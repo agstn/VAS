@@ -53,14 +53,14 @@ pacman::p_load(labelled)
 vas_01 <- read.csv("https://raw.githubusercontent.com/VIS-SIG/Wonderful-Wednesdays/master/data/2021/2021-05-12/vas_data.csv")
 
 var_label(vas_01) <- c(subject	  =	'Subject ID',
-                      trt01pn	  =	'Randomised treatment (0 = Placebo; 1 = Treatment)',
-                      ady	     =	'Study Day',
-                      sym	     =	'Vasculitis symptom score',
-                      dose	     =	'Oral Corticosteroid (OCS) dose',
-                      rem	     =	'Subject in Remission, i.e. Vasculitis Symptom Score = 0 and OCS Dose <= 7.5 mg/day (Y/N)',
-                      rel	     =	'Relapse Event (Y)',
-                      acc_rem	  =	'Accrued Duration of Remission (Days)',
-                      sus_rem	  =	'Subject Achieved Remission Within First 24 Weeks and Remained in Remission Until EOS? (Y/N))')
+                       trt01pn	  =	'Randomised treatment (0 = Placebo; 1 = Treatment)',
+                       ady	        =	'Study Day',
+                       sym	        =	'Vasculitis symptom score',
+                       dose	     =	'Oral Corticosteroid (OCS) dose',
+                       rem	        =	'Subject in Remission, i.e. Vasculitis Symptom Score = 0 and OCS Dose <= 7.5 mg/day (Y/N)',
+                       rel	        =	'Relapse Event (Y)',
+                       acc_rem	  =	'Accrued Duration of Remission (Days)',
+                       sus_rem	  =	'Subject Achieved Remission Within First 24 Weeks and Remained in Remission Until EOS? (Y/N))')
 
 # 1 rec per subject
 vas_per <- vas_01 %>% 
@@ -101,9 +101,19 @@ pacman::p_load(trelliscopejs)
 vas_per <- vas_per %>% 
    ungroup() %>% 
    select(subject, trt01pc) %>% 
-   left_join( vas_per_extra ) 
+   left_join( vas_per_extra ) %>% 
+   as.data.frame()
+
+vas_per <- set_labels(vas_per,
+                      list(trt01pc = "Randomised treatment (P = Placebo & T = Treatment)",
+                           n_ady  = "# of Days in study", 
+                           cumrem = "# of Remission Days", 
+                           cumrel = "# of Relapse Days",
+                           dose   = "Median Oral Corticosteroid (OCS) dose", 
+                           sym    = "Median Vasculitis symptom score"))
 
 # source('vas-gif.r') # generate the vas-gif prior to include into trelliscope
+
 vas_per %>%
    mutate(panel_col = img_panel_local(str_glue('vas-subject-gif/subject_{subject}.gif'))) %>%
    trelliscope(name = 'Vasculitis Visualization',
@@ -113,12 +123,7 @@ vas_per %>%
                ncol = 2,
                nrow = 1,
                state = list(sort = list(sort_spec("n_ady", dir = "desc")),
-                            label = list(trt01pc = "Randomised treatment (P = Placebo & T = Treatment)",
-                                         n_ady  = "# of Days in study", 
-                                         cumrem = "# of Remission Days", 
-                                         cumrel = "# of Relapse Days",
-                                         dose   = "Median Oral Corticosteroid (OCS) dose", 
-                                         sym    = "Median Vasculitis symptom score"))
+                            labels  = c('sym', 'dose'))
    )
 ```
 
@@ -146,6 +151,11 @@ Display](http://slides.com/hafen/trelliscopejs) or in it's documentation
 
 Trelliscope makes small multiple displays come alive by providing the ability to interactively 
 set a specific grid, filter or sorting sort  based on summary statistics computed for each group. 
+**n_ady**:# Days in study 
+**dose** Median OCS dose 
+**sym**Median Vasculitis symptom score 
+**cumrem**: # Remission Days" 
+**cumrel** # Relapse Days 
 
 ### **Group** Longitudinal (Means & Ratios) Visualization
 
